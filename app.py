@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog
 import tkinter.font as tkfont
 
 from trackers import TrackerManager, hhmm_to_minutes
@@ -620,3 +620,39 @@ class DayPlannerApp(tk.Tk):
                 f"Подробности: {exc}",
             )
             self.tasks = []
+
+        def change_window_size(self) -> None:
+            try:
+                width = simpledialog.askinteger(
+                    "Размер окна", "Ширина (px):", minvalue=600, maxvalue=1920, parent=self
+                )
+                if width is None:
+                    return
+                height = simpledialog.askinteger(
+                    "Размер окна", "Высота (px):", minvalue=400, maxvalue=1080, parent=self
+                )
+                if height is None:
+                    return
+                self.geometry(f"{width}x{height}")
+                self.status_var.set(f"Размер окна: {width}x{height}")
+            except Exception as exc:
+                messagebox.showerror("Ошибка", str(exc))
+
+        def on_exit(self) -> None:
+            if not messagebox.askokcancel("Выход", "Выйти из программы?"):
+                return
+            self._save_all()
+            self.destroy()
+
+        def show_about(self) -> None:
+            messagebox.showinfo(
+                "О программе",
+                "Планировщик дня (Tkinter)\n"
+                "• задачи + выполнено\n"
+                "• трекеры: вода, шаги, сон, чтение\n"
+                "• сохранение в JSON\n"
+                "• похвала при достижении нормы",
+            )
+
+    if __name__ == "__main__":
+        DayPlannerApp().mainloop()
