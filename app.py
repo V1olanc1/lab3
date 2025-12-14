@@ -3,14 +3,13 @@ from __future__ import annotations
 import datetime as dt
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List
-
+from typing import Any, Dict, List, Optional, Tuple
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import tkinter.font as tkfont
 
-from trackers import TrackerManager
+from trackers import TrackerManager, hhmm_to_minutes
 
 PRIMARY_COLOR = "#3f51b5"
 PRIMARY_DARK = "#303f9f"
@@ -359,3 +358,84 @@ class DayPlannerApp(tk.Tk):
             "value": value_var,
             "goal_hhmm": goal_var,
         }
+
+    def _show_congrats(self, congrats: Optional[Tuple[str, str]]) -> None:
+        if congrats:
+            title, msg = congrats
+            messagebox.showinfo(title, msg)
+
+    def _tracker_delta(self, key: str, delta: int) -> None:
+        try:
+            congrats = self.tracker_mgr.change_value(key, delta)
+            self._show_congrats(congrats)
+            self._refresh_tracker_ui(key)
+            self._save_all()
+        except Exception as exc:
+            messagebox.showerror("Ошибка", str(exc))
+
+    def _reset_tracker(self, key: str) -> None:
+        try:
+            if not messagebox.askyesno("Сброс", "Сбросить трекер на 0?"):
+                return
+            self.tracker_mgr.reset(key)
+            self._refresh_tracker_ui(key)
+            self._save_all()
+        except Exception as exc:
+            messagebox.showerror("Ошибка", str(exc))
+
+    def _apply_goal_counter(self, key: str) -> None:
+        try:
+            goal_var = self.tracker_ui[key]["goal"]
+            congrats = self.tracker_mgr.set_goal(key, int(goal_var.get()))
+            self._show_congrats(congrats)
+            self._refresh_tracker_ui(key)
+            self._save_all()
+            self.status_var.set("Норма обновлена.")
+        except Exception as exc:
+            messagebox.showerror("Ошибка", str(exc))
+
+    def _set_sleep_value(self, key: str) -> None:
+        try:
+            raw = str(self.tracker_ui[key]["value"].get())
+            minutes = hhmm_to_minutes(raw)
+            congrats = self.tracker_mgr.set_value(key, minutes)
+            self._show_congrats(congrats)
+            self._refresh_tracker_ui(key)
+            self._save_all()
+            self.status_var.set("Сон обновлён.")
+        except Exception as exc:
+            messagebox.showerror("Ошибка", str(exc))
+
+    def _apply_sleep_goal(self, key: str) -> None:
+        try:
+            raw = str(self.tracker_ui[key]["goal_hhmm"].get())
+            minutes = hhmm_to_minutes(raw)
+            congrats = self.tracker_mgr.set_goal(key, minutes)
+            self._show_congrats(congrats)
+            self._refresh_tracker_ui(key)
+            self._save_all()
+            self.status_var.set("Норма сна обновлена.")
+        except Exception as exc:
+            messagebox.showerror("Ошибка", str(exc))
+
+    def _refresh_tracker_ui(self, key: str) -> None:
+        cfg = self.tracker_mgr.configs[key]
+        st = self.tracker_mgr.state[key]
+        ui = self.tracker_ui[key]
+
+        if cfg.is_sleep:
+            ui["text"].set(f"{self.tracker_mgr.format_value(key)} / {self.tracker_mgr.format_goal(key)}")
+            ui["bar"]["maximum"] = max(1, st.goal)
+            ui["bar"]["value"] = min(st.value, st.goal)
+            ui["value"].set(self.tracker_mgr.format_value(key))
+            ui["goal_hhmm"].set(self.tracker_mgr.format_goal(key))
+            return
+
+        ui["text"].set(f"{st.value} / {st.goal} {cfg.unit}")
+        ui["bar"]["maximum"] = max(1, st.goal)
+        ui["bar"]["value"] = min(st.value, st.goal)
+        ui["goal"].set(st.goal)
+
+    def _refresh_all_trackers_ui(self) -> None:
+        for key in self.tracker_mgr.configs.keys():
+            self._refresh_tracker_ui(key)
