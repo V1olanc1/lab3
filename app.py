@@ -120,3 +120,59 @@ class DayPlannerApp(tk.Tk):
             foreground=[("active", "#ffffff"), ("pressed", "#ffffff")],
             background=[("!disabled", PRIMARY_COLOR), ("pressed", PRIMARY_DARK), ("active", PRIMARY_DARK)],
         )
+
+    def _create_menu(self) -> None:
+        main_menu = tk.Menu(self)
+
+        file_menu = tk.Menu(main_menu, tearoff=0)
+        file_menu.add_command(label="Выход", command=self.on_exit)
+        main_menu.add_cascade(label="Файл", menu=file_menu)
+
+        settings_menu = tk.Menu(main_menu, tearoff=0)
+        settings_menu.add_command(label="Размер окна...", command=self.change_window_size)
+        main_menu.add_cascade(label="Настройки", menu=settings_menu)
+
+        help_menu = tk.Menu(main_menu, tearoff=0)
+        help_menu.add_command(label="О программе", command=self.show_about)
+        main_menu.add_cascade(label="Справка", menu=help_menu)
+
+        self.config(menu=main_menu)
+
+    def _create_main_widgets(self) -> None:
+        header = tk.Frame(self, bg=PRIMARY_COLOR)
+        header.pack(fill=tk.X)
+
+        tk.Label(
+            header,
+            text="Планировщик дня",
+            bg=PRIMARY_COLOR,
+            fg="white",
+            font=("Segoe UI", 16, "bold"),
+        ).pack(side=tk.LEFT, padx=16, pady=10)
+
+        tk.Label(
+            header,
+            text=f"Сегодня: {self.today.strftime('%d.%m.%Y')}",
+            bg=PRIMARY_COLOR,
+            fg="white",
+            font=("Segoe UI", 10),
+        ).pack(side=tk.RIGHT, padx=16)
+
+        content = ttk.Frame(self, padding=10)
+        content.pack(fill=tk.BOTH, expand=True)
+
+        content.columnconfigure(0, weight=1)
+        content.columnconfigure(1, weight=2)
+        content.rowconfigure(0, weight=3)
+        content.rowconfigure(1, weight=2)
+
+        self._create_tasks_list(content)
+        self._create_trackers_panel(content)
+        self._create_task_form(content)
+
+        self.status_var = tk.StringVar(value="Готов к работе")
+        status_bar = tk.Frame(self, bg=STATUS_BG)
+        status_bar.pack(fill=tk.X, side=tk.BOTTOM)
+        tk.Label(status_bar, textvariable=self.status_var, bg=STATUS_BG, anchor="w").pack(
+            fill=tk.X, padx=10, pady=2
+        )
