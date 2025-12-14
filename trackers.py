@@ -152,3 +152,19 @@ class TrackerManager:
                 st.congrats_shown = False
                 changed = True
         return changed
+
+    def format_value(self, key: str) -> str:
+        """Формат value для UI."""
+        cfg = self.configs[key]
+        st = self.state[key]
+        if cfg.is_sleep:
+            return minutes_to_hhmm(st.value)
+        return str(st.value)
+
+    def format_goal(self, key: str) -> str:
+        """Формат goal для UI."""
+        cfg = self.configs[key]
+        st = self.state[key]
+        if cfg.is_sleep:
+            return minutes_to_hhmm(st.goal)
+        return str(st.goal)
