@@ -78,3 +78,66 @@ class TrackerState:
     value: int
     goal: int
     congrats_shown: bool = False
+
+class TrackerManager:
+    """Менеджер трекеров: хранит состояния, валидирует, даёт похвалу."""
+
+    def __init__(self, today: Optional[dt.date] = None) -> None:
+        self.today = today or dt.date.today()
+
+        self.configs: Dict[str, TrackerConfig] = {
+            "water": TrackerConfig(
+                key="water",
+                title="Вода",
+                unit="стаканов",
+                step=1,
+                default_goal=8,
+                min_goal=1,
+                max_goal=30,
+                max_value=200,
+                congrats_title="Отлично!",
+                congrats_template="Ты выпил(а) норму воды: {goal} стаканов.\nТак держать!",
+            ),
+            "steps": TrackerConfig(
+                key="steps",
+                title="Шаги",
+                unit="шагов",
+                step=500,
+                default_goal=10_000,
+                min_goal=1_000,
+                max_goal=50_000,
+                max_value=200_000,
+                congrats_title="Круто!",
+                congrats_template="Норма шагов выполнена: {goal}.\nОтличная активность!",
+            ),
+            "sleep": TrackerConfig(
+                key="sleep",
+                title="Сон",
+                unit="минут",
+                step=30,
+                default_goal=8 * 60,      # 8:00
+                min_goal=0,
+                max_goal=24 * 60,
+                max_value=24 * 60,
+                congrats_title="Супер!",
+                congrats_template="Норма сна выполнена: {goal}.\nХороший сон — это важно!",
+                is_sleep=True,
+            ),
+            "pages": TrackerConfig(
+                key="pages",
+                title="Чтение",
+                unit="страниц",
+                step=5,
+                default_goal=30,
+                min_goal=1,
+                max_goal=1000,
+                max_value=10_000,
+                congrats_title="Молодец!",
+                congrats_template="Норма чтения выполнена: {goal} страниц.\nОтличная привычка!",
+            ),
+        }
+
+        self.state: Dict[str, TrackerState] = {
+            k: TrackerState(date=self.today, value=0, goal=cfg.default_goal)
+            for k, cfg in self.configs.items()
+        }
