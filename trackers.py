@@ -168,3 +168,46 @@ class TrackerManager:
         if cfg.is_sleep:
             return minutes_to_hhmm(st.goal)
         return str(st.goal)
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Сериализация трекеров."""
+        trackers: Dict[str, Any] = {}
+        for key, st in self.state.items():
+            trackers[key] = {
+                "date": st.date.isoformat(),
+                "value": st.value,
+                "goal": st.goal,
+                "congrats_shown": st.congrats_shown,
+            }
+        return {"version": DATA_VERSION, "trackers": trackers}
+
+    def load_from_dict(self, data: Dict[str, Any]) -> None:
+        """Загрузка трекеров из dict (с защитой от мусора)."""
+        if not isinstance(data, dict):
+            return
+
+        root = data.get("trackers")
+        if not isinstance(root, dict):
+            return
+
+        for key, cfg in self.configs.items():
+            raw = root.get(key)
+            if not isinstance(raw, dict):
+                continue
+
+            date_str = str(raw.get("date", "")).strip()
+            try:
+                date_val = dt.date.fromisoformat(date_str) if date_str else self.today
+            except ValueError:
+                date_val = self.today
+
+            value = safe_int(raw.get("value"), 0)
+            goal = safe_int(raw.get("goal"), cfg.default_goal)
+            congrats = bool(raw.get("congrats_shown", False))
+
+            st = self.state[key]
+            st.date = date_val
+            st.value = clamp(value, 0, cfg.max_value)
+            st.goal = clamp(goal, cfg.min_goal, cfg.max_goal)
+            st.congrats_shown = congrats
+
