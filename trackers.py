@@ -141,3 +141,14 @@ class TrackerManager:
             k: TrackerState(date=self.today, value=0, goal=cfg.default_goal)
             for k, cfg in self.configs.items()
         }
+
+    def reset_if_new_day(self) -> bool:
+        """Сбросить значения, если наступил новый день. Возвращает True, если были изменения."""
+        changed = False
+        for key, st in self.state.items():
+            if st.date != self.today:
+                st.date = self.today
+                st.value = 0
+                st.congrats_shown = False
+                changed = True
+        return changed
