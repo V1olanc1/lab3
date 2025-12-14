@@ -161,7 +161,6 @@ class TrackerManager:
 
         st.value = clamp(st.value + delta, 0, cfg.max_value)
 
-        # если значение упало ниже нормы — разрешаем похвалу снова
         if st.value < st.goal:
             st.congrats_shown = False
 
@@ -174,6 +173,7 @@ class TrackerManager:
         st = self.state[key]
 
         st.value = clamp(value, 0, cfg.max_value)
+
         if st.value < st.goal:
             st.congrats_shown = False
 
@@ -186,13 +186,14 @@ class TrackerManager:
         st = self.state[key]
 
         st.goal = clamp(goal, cfg.min_goal, cfg.max_goal)
+
         if st.value < st.goal:
             st.congrats_shown = False
 
         return self._maybe_congratulate(key)
 
     def reset(self, key: str) -> None:
-        """Сбросить конкретный трекер."""
+        """Сбросить конкретный трекер на 0."""
         self._ensure_today(key)
         st = self.state[key]
         st.value = 0

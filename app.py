@@ -147,7 +147,7 @@ class DayPlannerApp(tk.Tk):
 
     def _create_main_widgets(self) -> None:
         header = tk.Frame(self, bg=PRIMARY_COLOR)
-        header.pack(fill=tk.X)
+        header.pack(fill="x")
 
         tk.Label(
             header,
@@ -155,7 +155,7 @@ class DayPlannerApp(tk.Tk):
             bg=PRIMARY_COLOR,
             fg="white",
             font=("Segoe UI", 16, "bold"),
-        ).pack(side=tk.LEFT, padx=16, pady=10)
+        ).pack(side="left", padx=16, pady=10)
 
         tk.Label(
             header,
@@ -163,10 +163,10 @@ class DayPlannerApp(tk.Tk):
             bg=PRIMARY_COLOR,
             fg="white",
             font=("Segoe UI", 10),
-        ).pack(side=tk.RIGHT, padx=16)
+        ).pack(side="right", padx=16)
 
         content = ttk.Frame(self, padding=10)
-        content.pack(fill=tk.BOTH, expand=True)
+        content.pack(fill="both", expand=True)
 
         content.columnconfigure(0, weight=1)
         content.columnconfigure(1, weight=2)
@@ -179,33 +179,33 @@ class DayPlannerApp(tk.Tk):
 
         self.status_var = tk.StringVar(value="Готов к работе")
         status_bar = tk.Frame(self, bg=STATUS_BG)
-        status_bar.pack(fill=tk.X, side=tk.BOTTOM)
+        status_bar.pack(fill="x", side="bottom")
         tk.Label(status_bar, textvariable=self.status_var, bg=STATUS_BG, anchor="w").pack(
-            fill=tk.X, padx=10, pady=2
+            fill="x", padx=10, pady=2
         )
 
     def _create_tasks_list(self, parent: ttk.Frame) -> None:
         card = ttk.Frame(parent, style="Card.TFrame", padding=10)
         card.grid(row=0, column=0, sticky="nsew", padx=(0, 5), pady=(0, 5))
 
-        ttk.Label(card, text="Список задач", style="Header.TLabel").pack(anchor=tk.W)
+        ttk.Label(card, text="Список задач", style="Header.TLabel").pack(anchor="w")
 
         frame = ttk.Frame(card)
-        frame.pack(fill=tk.BOTH, expand=True, pady=(8, 0))
+        frame.pack(fill="both", expand=True, pady=(8, 0))
 
         self.tasks_listbox = tk.Listbox(
             frame,
-            relief=tk.FLAT,
+            relief="flat",
             highlightthickness=0,
             activestyle="none",
             selectbackground=PRIMARY_COLOR,
             selectforeground="white",
             bg=CARD_BACKGROUND,
         )
-        self.tasks_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.tasks_listbox.pack(side="left", fill="both", expand=True)
 
-        scroll = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=self.tasks_listbox.yview)
-        scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        scroll = ttk.Scrollbar(frame, orient="vertical", command=self.tasks_listbox.yview)
+        scroll.pack(side="right", fill="y")
         self.tasks_listbox.config(yscrollcommand=scroll.set)
 
         self.tasks_listbox.bind("<<ListboxSelect>>", self.on_task_selected)
@@ -234,15 +234,15 @@ class DayPlannerApp(tk.Tk):
         self.description_text = tk.Text(
             desc_frame,
             height=8,
-            wrap=tk.WORD,
-            relief=tk.FLAT,
+            wrap="word",
+            relief="flat",
             highlightthickness=0,
             bg=CARD_BACKGROUND,
         )
-        self.description_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.description_text.pack(side="left", fill="both", expand=True)
 
-        desc_scroll = ttk.Scrollbar(desc_frame, orient=tk.VERTICAL, command=self.description_text.yview)
-        desc_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        desc_scroll = ttk.Scrollbar(desc_frame, orient="vertical", command=self.description_text.yview)
+        desc_scroll.pack(side="right", fill="y")
         self.description_text.config(yscrollcommand=desc_scroll.set)
 
         self.completed_var = tk.BooleanVar(value=False)
@@ -254,13 +254,13 @@ class DayPlannerApp(tk.Tk):
         buttons.grid(row=5, column=0, columnspan=2, pady=(10, 0), sticky="e")
 
         ttk.Button(buttons, text="Добавить", style="Accent.TButton", command=self.add_task).pack(
-            side=tk.LEFT, padx=4
+            side="left", padx=4
         )
         ttk.Button(buttons, text="Изменить", style="Accent.TButton", command=self.edit_task).pack(
-            side=tk.LEFT, padx=4
+            side="left", padx=4
         )
-        ttk.Button(buttons, text="Удалить", command=self.delete_task).pack(side=tk.LEFT, padx=4)
-        ttk.Button(buttons, text="Очистить форму", command=self.clear_form).pack(side=tk.LEFT, padx=4)
+        ttk.Button(buttons, text="Удалить", command=self.delete_task).pack(side="left", padx=4)
+        ttk.Button(buttons, text="Очистить форму", command=self.clear_form).pack(side="left", padx=4)
 
         card.columnconfigure(1, weight=1)
         card.rowconfigure(3, weight=1)
@@ -269,10 +269,10 @@ class DayPlannerApp(tk.Tk):
         card = ttk.Frame(parent, style="Card.TFrame", padding=10)
         card.grid(row=1, column=0, sticky="nsew", padx=(0, 5), pady=(5, 0))
 
-        ttk.Label(card, text="Трекеры", style="Header.TLabel").pack(anchor=tk.W)
+        ttk.Label(card, text="Трекеры", style="Header.TLabel").pack(anchor="w")
 
         notebook = ttk.Notebook(card)
-        notebook.pack(fill=tk.BOTH, expand=True, pady=(8, 0))
+        notebook.pack(fill="both", expand=True, pady=(8, 0))
 
         # вкладки в цикле по конфигам
         for key, cfg in self.tracker_mgr.configs.items():
@@ -287,22 +287,22 @@ class DayPlannerApp(tk.Tk):
         cfg = self.tracker_mgr.configs[key]
 
         text_var = tk.StringVar(value="")
-        ttk.Label(tab, textvariable=text_var).pack(anchor=tk.W)
+        ttk.Label(tab, textvariable=text_var).pack(anchor="w")
 
-        bar = ttk.Progressbar(tab, orient=tk.HORIZONTAL, mode="determinate")
-        bar.pack(fill=tk.X, pady=(6, 10))
+        bar = ttk.Progressbar(tab, orient="horizontal", mode="determinate")
+        bar.pack(fill="x", pady=(6, 10))
 
         row = ttk.Frame(tab)
-        row.pack(fill=tk.X)
+        row.pack(fill="x")
 
         ttk.Button(row, text=f"−{cfg.step}", command=lambda: self._tracker_delta(key, -cfg.step)).pack(
-            side=tk.LEFT
+            side="left"
         )
         ttk.Button(row, text=f"+{cfg.step}", command=lambda: self._tracker_delta(key, cfg.step)).pack(
-            side=tk.LEFT, padx=(6, 12)
+            side="left", padx=(6, 12)
         )
 
-        ttk.Label(row, text="Норма:").pack(side=tk.LEFT)
+        ttk.Label(row, text="Норма:").pack(side="left")
 
         goal_var = tk.IntVar(value=self.tracker_mgr.state[key].goal)
         spin_cls = getattr(ttk, "Spinbox", tk.Spinbox)
@@ -315,50 +315,50 @@ class DayPlannerApp(tk.Tk):
             textvariable=goal_var,
             command=lambda: self._apply_goal_counter(key),
         )
-        spin.pack(side=tk.LEFT, padx=6)
+        spin.pack(side="left", padx=6)
         spin.bind("<Return>", lambda _e: self._apply_goal_counter(key))
         spin.bind("<FocusOut>", lambda _e: self._apply_goal_counter(key))
 
-        ttk.Button(row, text="Сброс", command=lambda: self._reset_tracker(key)).pack(side=tk.RIGHT)
+        ttk.Button(row, text="Сброс", command=lambda: self._reset_tracker(key)).pack(side="right")
 
         self.tracker_ui[key] = {"text": text_var, "bar": bar, "goal": goal_var}
 
     def _build_sleep_tab(self, tab: ttk.Frame, key: str) -> None:
         text_var = tk.StringVar(value="")
-        ttk.Label(tab, textvariable=text_var).pack(anchor=tk.W)
+        ttk.Label(tab, textvariable=text_var).pack(anchor="w")
 
-        bar = ttk.Progressbar(tab, orient=tk.HORIZONTAL, mode="determinate")
-        bar.pack(fill=tk.X, pady=(6, 10))
+        bar = ttk.Progressbar(tab, orient="horizontal", mode="determinate")
+        bar.pack(fill="x", pady=(6, 10))
 
         row1 = ttk.Frame(tab)
-        row1.pack(fill=tk.X)
+        row1.pack(fill="x")
 
-        ttk.Label(row1, text="Сон (чч:мм):").pack(side=tk.LEFT)
+        ttk.Label(row1, text="Сон (чч:мм):").pack(side="left")
         value_var = tk.StringVar(value=self.tracker_mgr.format_value(key))
-        ttk.Entry(row1, width=8, textvariable=value_var).pack(side=tk.LEFT, padx=6)
+        ttk.Entry(row1, width=8, textvariable=value_var).pack(side="left", padx=6)
 
         ttk.Button(row1, text="Установить", command=lambda: self._set_sleep_value(key)).pack(
-            side=tk.LEFT
+            side="left"
         )
 
         ttk.Button(row1, text="+30м", command=lambda: self._tracker_delta(key, 30)).pack(
-            side=tk.LEFT, padx=(10, 0)
+            side="left", padx=(10, 0)
         )
         ttk.Button(row1, text="−30м", command=lambda: self._tracker_delta(key, -30)).pack(
-            side=tk.LEFT, padx=6
+            side="left", padx=6
         )
 
         row2 = ttk.Frame(tab)
-        row2.pack(fill=tk.X, pady=(10, 0))
+        row2.pack(fill="x", pady=(10, 0))
 
-        ttk.Label(row2, text="Норма (чч:мм):").pack(side=tk.LEFT)
+        ttk.Label(row2, text="Норма (чч:мм):").pack(side="left")
         goal_var = tk.StringVar(value=self.tracker_mgr.format_goal(key))
-        ttk.Entry(row2, width=8, textvariable=goal_var).pack(side=tk.LEFT, padx=6)
+        ttk.Entry(row2, width=8, textvariable=goal_var).pack(side="left", padx=6)
 
         ttk.Button(row2, text="Применить", command=lambda: self._apply_sleep_goal(key)).pack(
-            side=tk.LEFT
+            side="left"
         )
-        ttk.Button(row2, text="Сброс", command=lambda: self._reset_tracker(key)).pack(side=tk.RIGHT)
+        ttk.Button(row2, text="Сброс", command=lambda: self._reset_tracker(key)).pack(side="right")
 
         self.tracker_ui[key] = {
             "text": text_var,
@@ -367,7 +367,8 @@ class DayPlannerApp(tk.Tk):
             "goal_hhmm": goal_var,
         }
 
-    def _show_congrats(self, congrats: Optional[Tuple[str, str]]) -> None:
+    @staticmethod
+    def _show_congrats(congrats: Optional[Tuple[str, str]]) -> None:
         if congrats:
             title, msg = congrats
             messagebox.showinfo(title, msg)
@@ -455,13 +456,13 @@ class DayPlannerApp(tk.Tk):
                 return
             task = self.tasks[idx]
 
-            self.time_entry.delete(0, tk.END)
+            self.time_entry.delete(0, "end")
             self.time_entry.insert(0, task.time.strftime("%H:%M"))
 
-            self.title_entry.delete(0, tk.END)
+            self.title_entry.delete(0, "end")
             self.title_entry.insert(0, task.title)
 
-            self.description_text.delete("1.0", tk.END)
+            self.description_text.delete("1.0", "end")
             self.description_text.insert("1.0", task.description)
 
             self.completed_var.set(task.completed)
@@ -478,11 +479,11 @@ class DayPlannerApp(tk.Tk):
             if not title:
                 raise ValueError("Название задачи не может быть пустым.")
 
-            desc = self.description_text.get("1.0", tk.END).strip()
+            desc = self.description_text.get("1.0", "end").strip()
             completed = bool(self.completed_var.get())
 
             self.tasks.append(Task(time=t, title=title, description=desc, completed=completed))
-            self.tasks.sort()
+            self.tasks.sort(key=lambda t: t.time)
 
             self._refresh_tasks_list()
             self._save_all()
@@ -513,10 +514,10 @@ class DayPlannerApp(tk.Tk):
 
             old.time = t
             old.title = title
-            old.description = self.description_text.get("1.0", tk.END).strip()
+            old.description = self.description_text.get("1.0", "end").strip()
             old.completed = bool(self.completed_var.get())
 
-            self.tasks.sort()
+            self.tasks.sort(key=lambda t: t.time)
             self._refresh_tasks_list()
             self._save_all()
             self.status_var.set("Задача изменена и сохранена.")
@@ -543,13 +544,14 @@ class DayPlannerApp(tk.Tk):
             messagebox.showerror("Неожиданная ошибка", str(exc))
 
     def clear_form(self) -> None:
-        self.time_entry.delete(0, tk.END)
-        self.title_entry.delete(0, tk.END)
-        self.description_text.delete("1.0", tk.END)
+        self.time_entry.delete(0, "end")
+        self.title_entry.delete(0, "end")
+        self.description_text.delete("1.0", "end")
         self.completed_var.set(False)
         self.status_var.set("Форма очищена.")
 
-    def _parse_time_entry(self, time_str: str) -> dt.time:
+    @staticmethod
+    def _parse_time_entry(time_str: str) -> dt.time:
         raw = time_str.strip()
         if not raw:
             raise ValueError("Поле времени не может быть пустым.")
@@ -565,9 +567,9 @@ class DayPlannerApp(tk.Tk):
             raise ValueError("Нельзя поставить задачу на время в прошлом.")
 
     def _refresh_tasks_list(self) -> None:
-        self.tasks_listbox.delete(0, tk.END)
+        self.tasks_listbox.delete(0, "end")
         for task in self.tasks:
-            self.tasks_listbox.insert(tk.END, task.format_for_list())
+            self.tasks_listbox.insert("end", task.format_for_list())
 
     def _selected_task_index(self) -> Optional[int]:
         sel = self.tasks_listbox.curselection()
@@ -607,9 +609,9 @@ class DayPlannerApp(tk.Tk):
                     if not isinstance(item, dict):
                         raise ValueError
                     loaded_tasks.append(Task.from_dict(item))
-                except Exception:
+                except (ValueError, TypeError):
                     skipped += 1
-            self.tasks = sorted(loaded_tasks)
+            self.tasks = sorted(loaded_tasks, key=lambda t: t.time)
 
             if skipped:
                 messagebox.showwarning("Загрузка", f"Пропущено битых задач: {skipped}")
@@ -651,7 +653,8 @@ class DayPlannerApp(tk.Tk):
         self._save_all()
         self.destroy()
 
-    def show_about(self) -> None:
+    @staticmethod
+    def show_about() -> None:
         messagebox.showinfo(
             "О программе",
             "Планировщик дня (Tkinter)\n"
