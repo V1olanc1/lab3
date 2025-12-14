@@ -1,3 +1,9 @@
+"""
+app.py
+GUI: задачи планировщика + вкладки трекеров.
+Сохранение в один JSON (задачи + трекеры), загрузка при старте.
+"""
+
 from __future__ import annotations
 
 import datetime as dt
@@ -64,6 +70,7 @@ class Task:
             description=str(data.get("description", "")),
             completed=bool(data.get("completed", False)),
         )
+
 class DayPlannerApp(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
@@ -621,38 +628,39 @@ class DayPlannerApp(tk.Tk):
             )
             self.tasks = []
 
-        def change_window_size(self) -> None:
-            try:
-                width = simpledialog.askinteger(
-                    "Размер окна", "Ширина (px):", minvalue=600, maxvalue=1920, parent=self
-                )
-                if width is None:
-                    return
-                height = simpledialog.askinteger(
-                    "Размер окна", "Высота (px):", minvalue=400, maxvalue=1080, parent=self
-                )
-                if height is None:
-                    return
-                self.geometry(f"{width}x{height}")
-                self.status_var.set(f"Размер окна: {width}x{height}")
-            except Exception as exc:
-                messagebox.showerror("Ошибка", str(exc))
-
-        def on_exit(self) -> None:
-            if not messagebox.askokcancel("Выход", "Выйти из программы?"):
-                return
-            self._save_all()
-            self.destroy()
-
-        def show_about(self) -> None:
-            messagebox.showinfo(
-                "О программе",
-                "Планировщик дня (Tkinter)\n"
-                "• задачи + выполнено\n"
-                "• трекеры: вода, шаги, сон, чтение\n"
-                "• сохранение в JSON\n"
-                "• похвала при достижении нормы",
+    def change_window_size(self) -> None:
+        try:
+            width = simpledialog.askinteger(
+                "Размер окна", "Ширина (px):", minvalue=600, maxvalue=1920, parent=self
             )
+            if width is None:
+                return
+            height = simpledialog.askinteger(
+                "Размер окна", "Высота (px):", minvalue=400, maxvalue=1080, parent=self
+            )
+            if height is None:
+                return
+            self.geometry(f"{width}x{height}")
+            self.status_var.set(f"Размер окна: {width}x{height}")
+        except Exception as exc:
+            messagebox.showerror("Ошибка", str(exc))
 
-    if __name__ == "__main__":
-        DayPlannerApp().mainloop()
+    def on_exit(self) -> None:
+        if not messagebox.askokcancel("Выход", "Выйти из программы?"):
+            return
+        self._save_all()
+        self.destroy()
+
+    def show_about(self) -> None:
+        messagebox.showinfo(
+            "О программе",
+            "Планировщик дня (Tkinter)\n"
+            "• задачи + выполнено\n"
+            "• трекеры: вода, шаги, сон, чтение\n"
+            "• сохранение в JSON\n"
+            "• похвала при достижении нормы",
+        )
+
+
+if __name__ == "__main__":
+    DayPlannerApp().mainloop()
