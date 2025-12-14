@@ -54,3 +54,27 @@ def hhmm_to_minutes(text: str) -> int:
     if total > 24 * 60:
         raise ValueError("Значение не может быть больше 24:00.")
     return total
+
+@dataclass(frozen=True)
+class TrackerConfig:
+    """Конфигурация трекера."""
+    key: str
+    title: str
+    unit: str
+    step: int
+    default_goal: int
+    min_goal: int
+    max_goal: int
+    max_value: int
+    congrats_title: str
+    congrats_template: str
+    is_sleep: bool = False  # сон хранится в минутах, UI в HH:MM
+
+
+@dataclass
+class TrackerState:
+    """Состояние трекера."""
+    date: dt.date
+    value: int
+    goal: int
+    congrats_shown: bool = False
