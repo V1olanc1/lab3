@@ -153,6 +153,51 @@ class TrackerManager:
                 changed = True
         return changed
 
+    def change_value(self, key: str, delta: int) -> Optional[tuple[str, str]]:
+        """Изменить значение на delta. Вернёт похвалу (title, msg), если норма достигнута впервые."""
+        self._ensure_today(key)
+        cfg = self.configs[key]
+        st = self.state[key]
+
+        st.value = clamp(st.value + delta, 0, cfg.max_value)
+
+        # если значение упало ниже нормы — разрешаем похвалу снова
+        if st.value < st.goal:
+            st.congrats_shown = False
+
+        return self._maybe_congratulate(key)
+
+    def set_value(self, key: str, value: int) -> Optional[tuple[str, str]]:
+        """Установить точное значение (для сна удобно)."""
+        self._ensure_today(key)
+        cfg = self.configs[key]
+        st = self.state[key]
+
+        st.value = clamp(value, 0, cfg.max_value)
+        if st.value < st.goal:
+            st.congrats_shown = False
+
+        return self._maybe_congratulate(key)
+
+    def set_goal(self, key: str, goal: int) -> Optional[tuple[str, str]]:
+        """Установить норму."""
+        self._ensure_today(key)
+        cfg = self.configs[key]
+        st = self.state[key]
+
+        st.goal = clamp(goal, cfg.min_goal, cfg.max_goal)
+        if st.value < st.goal:
+            st.congrats_shown = False
+
+        return self._maybe_congratulate(key)
+
+    def reset(self, key: str) -> None:
+        """Сбросить конкретный трекер."""
+        self._ensure_today(key)
+        st = self.state[key]
+        st.value = 0
+        st.congrats_shown = False
+
     def format_value(self, key: str) -> str:
         """Формат value для UI."""
         cfg = self.configs[key]
