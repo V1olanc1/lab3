@@ -211,3 +211,23 @@ class TrackerManager:
             st.goal = clamp(goal, cfg.min_goal, cfg.max_goal)
             st.congrats_shown = congrats
 
+    def _ensure_today(self, key: str) -> None:
+        st = self.state[key]
+        if st.date != self.today:
+            st.date = self.today
+            st.value = 0
+            st.congrats_shown = False
+
+    def _maybe_congratulate(self, key: str) -> Optional[tuple[str, str]]:
+        cfg = self.configs[key]
+        st = self.state[key]
+
+        if st.congrats_shown or st.goal <= 0:
+            return None
+        if st.value < st.goal:
+            return None
+
+        st.congrats_shown = True
+        goal_str = minutes_to_hhmm(st.goal) if cfg.is_sleep else str(st.goal)
+        msg = cfg.congrats_template.format(goal=goal_str)
+        return cfg.congrats_title, msg
