@@ -315,3 +315,47 @@ class DayPlannerApp(tk.Tk):
         ttk.Button(row, text="Сброс", command=lambda: self._reset_tracker(key)).pack(side=tk.RIGHT)
 
         self.tracker_ui[key] = {"text": text_var, "bar": bar, "goal": goal_var}
+
+    def _build_sleep_tab(self, tab: ttk.Frame, key: str) -> None:
+        text_var = tk.StringVar(value="")
+        ttk.Label(tab, textvariable=text_var).pack(anchor=tk.W)
+
+        bar = ttk.Progressbar(tab, orient=tk.HORIZONTAL, mode="determinate")
+        bar.pack(fill=tk.X, pady=(6, 10))
+
+        row1 = ttk.Frame(tab)
+        row1.pack(fill=tk.X)
+
+        ttk.Label(row1, text="Сон (чч:мм):").pack(side=tk.LEFT)
+        value_var = tk.StringVar(value=self.tracker_mgr.format_value(key))
+        ttk.Entry(row1, width=8, textvariable=value_var).pack(side=tk.LEFT, padx=6)
+
+        ttk.Button(row1, text="Установить", command=lambda: self._set_sleep_value(key)).pack(
+            side=tk.LEFT
+        )
+
+        ttk.Button(row1, text="+30м", command=lambda: self._tracker_delta(key, 30)).pack(
+            side=tk.LEFT, padx=(10, 0)
+        )
+        ttk.Button(row1, text="−30м", command=lambda: self._tracker_delta(key, -30)).pack(
+            side=tk.LEFT, padx=6
+        )
+
+        row2 = ttk.Frame(tab)
+        row2.pack(fill=tk.X, pady=(10, 0))
+
+        ttk.Label(row2, text="Норма (чч:мм):").pack(side=tk.LEFT)
+        goal_var = tk.StringVar(value=self.tracker_mgr.format_goal(key))
+        ttk.Entry(row2, width=8, textvariable=goal_var).pack(side=tk.LEFT, padx=6)
+
+        ttk.Button(row2, text="Применить", command=lambda: self._apply_sleep_goal(key)).pack(
+            side=tk.LEFT
+        )
+        ttk.Button(row2, text="Сброс", command=lambda: self._reset_tracker(key)).pack(side=tk.RIGHT)
+
+        self.tracker_ui[key] = {
+            "text": text_var,
+            "bar": bar,
+            "value": value_var,
+            "goal_hhmm": goal_var,
+        }
