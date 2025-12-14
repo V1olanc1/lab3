@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -566,3 +567,56 @@ class DayPlannerApp(tk.Tk):
         if not sel:
             return None
         return int(sel[0])
+
+    def _save_all(self) -> None:
+        """Сохранить задачи + трекеры. Ошибка не должна закрыть приложение."""
+        try:
+            data = {
+                "saved_at": dt.datetime.now().isoformat(timespec="seconds"),
+                "tasks": [t.to_dict() for t in self.tasks],
+                "tracker_data": self.tracker_mgr.to_dict(),
+            }
+            tmp = self.storage_path.with_suffix(self.storage_path.suffix + ".tmp")
+            tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+            tmp.replace(self.storage_path)
+        except OSError as exc:
+            self.status_var.set("Ошибка сохранения.")
+            messagebox.showwarning("Ошибка сохранения", f"Не удалось сохранить данные:\n{exc}")
+
+    def _load_all(self) -> None:
+        """Загрузить задачи + трекеры. При ошибке — не падаем."""
+        if not self.storage_path.exists():
+            self.status_var.set("Нет сохранённых данных (файл не найден).")
+            return
+
+        try:
+            raw = json.loads(self.storage_path.read_text(encoding="utf-8"))
+
+            # tasks
+            loaded_tasks: List[Task] = []
+            skipped = 0
+            for item in raw.get("tasks", []):
+                try:
+                    if not isinstance(item, dict):
+                        raise ValueError
+                    loaded_tasks.append(Task.from_dict(item))
+                except Exception:
+                    skipped += 1
+            self.tasks = sorted(loaded_tasks)
+
+            if skipped:
+                messagebox.showwarning("Загрузка", f"Пропущено битых задач: {skipped}")
+
+            # trackers
+            tracker_data = raw.get("tracker_data", {})
+            self.tracker_mgr.load_from_dict(tracker_data)
+
+            self.status_var.set(f"Загружено задач: {len(self.tasks)}")
+        except (OSError, json.JSONDecodeError, ValueError) as exc:
+            messagebox.showwarning(
+                "Не удалось загрузить данные",
+                "Файл данных повреждён/недоступен.\n"
+                "Приложение запущено с пустыми данными.\n\n"
+                f"Подробности: {exc}",
+            )
+            self.tasks = []
