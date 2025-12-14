@@ -176,3 +176,84 @@ class DayPlannerApp(tk.Tk):
         tk.Label(status_bar, textvariable=self.status_var, bg=STATUS_BG, anchor="w").pack(
             fill=tk.X, padx=10, pady=2
         )
+
+    def _create_tasks_list(self, parent: ttk.Frame) -> None:
+        card = ttk.Frame(parent, style="Card.TFrame", padding=10)
+        card.grid(row=0, column=0, sticky="nsew", padx=(0, 5), pady=(0, 5))
+
+        ttk.Label(card, text="Список задач", style="Header.TLabel").pack(anchor=tk.W)
+
+        frame = ttk.Frame(card)
+        frame.pack(fill=tk.BOTH, expand=True, pady=(8, 0))
+
+        self.tasks_listbox = tk.Listbox(
+            frame,
+            relief=tk.FLAT,
+            highlightthickness=0,
+            activestyle="none",
+            selectbackground=PRIMARY_COLOR,
+            selectforeground="white",
+            bg=CARD_BACKGROUND,
+        )
+        self.tasks_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        scroll = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=self.tasks_listbox.yview)
+        scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        self.tasks_listbox.config(yscrollcommand=scroll.set)
+
+        self.tasks_listbox.bind("<<ListboxSelect>>", self.on_task_selected)
+
+    def _create_task_form(self, parent: ttk.Frame) -> None:
+        card = ttk.Frame(parent, style="Card.TFrame", padding=10)
+        card.grid(row=0, column=1, rowspan=2, sticky="nsew", padx=(5, 0))
+
+        ttk.Label(card, text="Детали задачи", style="Header.TLabel").grid(
+            row=0, column=0, columnspan=2, sticky="w"
+        )
+
+        ttk.Label(card, text="Время (чч:мм):").grid(row=1, column=0, sticky="w", pady=4)
+        self.time_entry = ttk.Entry(card, width=10)
+        self.time_entry.grid(row=1, column=1, sticky="we", pady=4)
+
+        ttk.Label(card, text="Название:").grid(row=2, column=0, sticky="w", pady=4)
+        self.title_entry = ttk.Entry(card)
+        self.title_entry.grid(row=2, column=1, sticky="we", pady=4)
+
+        ttk.Label(card, text="Описание:").grid(row=3, column=0, sticky="nw", pady=4)
+
+        desc_frame = ttk.Frame(card, style="Card.TFrame")
+        desc_frame.grid(row=3, column=1, sticky="nsew", pady=4)
+
+        self.description_text = tk.Text(
+            desc_frame,
+            height=8,
+            wrap=tk.WORD,
+            relief=tk.FLAT,
+            highlightthickness=0,
+            bg=CARD_BACKGROUND,
+        )
+        self.description_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        desc_scroll = ttk.Scrollbar(desc_frame, orient=tk.VERTICAL, command=self.description_text.yview)
+        desc_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        self.description_text.config(yscrollcommand=desc_scroll.set)
+
+        self.completed_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(card, text="Задача выполнена", variable=self.completed_var).grid(
+            row=4, column=0, columnspan=2, sticky="w", pady=(4, 0)
+        )
+
+        buttons = ttk.Frame(card, style="Card.TFrame")
+        buttons.grid(row=5, column=0, columnspan=2, pady=(10, 0), sticky="e")
+
+        ttk.Button(buttons, text="Добавить", style="Accent.TButton", command=self.add_task).pack(
+            side=tk.LEFT, padx=4
+        )
+        ttk.Button(buttons, text="Изменить", style="Accent.TButton", command=self.edit_task).pack(
+            side=tk.LEFT, padx=4
+        )
+        ttk.Button(buttons, text="Удалить", command=self.delete_task).pack(side=tk.LEFT, padx=4)
+        ttk.Button(buttons, text="Очистить форму", command=self.clear_form).pack(side=tk.LEFT, padx=4)
+
+        card.columnconfigure(1, weight=1)
+        card.rowconfigure(3, weight=1)
