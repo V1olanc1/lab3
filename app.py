@@ -439,3 +439,130 @@ class DayPlannerApp(tk.Tk):
     def _refresh_all_trackers_ui(self) -> None:
         for key in self.tracker_mgr.configs.keys():
             self._refresh_tracker_ui(key)
+
+    def on_task_selected(self, _event: tk.Event) -> None:
+        try:
+            idx = self._selected_task_index()
+            if idx is None:
+                return
+            task = self.tasks[idx]
+
+            self.time_entry.delete(0, tk.END)
+            self.time_entry.insert(0, task.time.strftime("%H:%M"))
+
+            self.title_entry.delete(0, tk.END)
+            self.title_entry.insert(0, task.title)
+
+            self.description_text.delete("1.0", tk.END)
+            self.description_text.insert("1.0", task.description)
+
+            self.completed_var.set(task.completed)
+            self.status_var.set("Задача загружена в форму.")
+        except Exception as exc:
+            messagebox.showerror("Ошибка", str(exc))
+
+    def add_task(self) -> None:
+        try:
+            t = self._parse_time_entry(self.time_entry.get())
+            self._validate_not_past(t)
+
+            title = self.title_entry.get().strip()
+            if not title:
+                raise ValueError("Название задачи не может быть пустым.")
+
+            desc = self.description_text.get("1.0", tk.END).strip()
+            completed = bool(self.completed_var.get())
+
+            self.tasks.append(Task(time=t, title=title, description=desc, completed=completed))
+            self.tasks.sort()
+
+            self._refresh_tasks_list()
+            self._save_all()
+            self.clear_form()
+            self.status_var.set("Задача добавлена и сохранена.")
+        except ValueError as exc:
+            messagebox.showerror("Ошибка ввода", str(exc))
+        except Exception as exc:
+            messagebox.showerror("Неожиданная ошибка", str(exc))
+
+    def edit_task(self) -> None:
+        try:
+            idx = self._selected_task_index()
+            if idx is None:
+                messagebox.showwarning("Нет выбора", "Сначала выберите задачу в списке.")
+                return
+
+            old = self.tasks[idx]
+            t = self._parse_time_entry(self.time_entry.get())
+
+            title = self.title_entry.get().strip()
+            if not title:
+                raise ValueError("Название задачи не может быть пустым.")
+
+            # проверка «в прошлом» только если время поменяли
+            if t != old.time:
+                self._validate_not_past(t)
+
+            old.time = t
+            old.title = title
+            old.description = self.description_text.get("1.0", tk.END).strip()
+            old.completed = bool(self.completed_var.get())
+
+            self.tasks.sort()
+            self._refresh_tasks_list()
+            self._save_all()
+            self.status_var.set("Задача изменена и сохранена.")
+        except ValueError as exc:
+            messagebox.showerror("Ошибка ввода", str(exc))
+        except Exception as exc:
+            messagebox.showerror("Неожиданная ошибка", str(exc))
+
+    def delete_task(self) -> None:
+        try:
+            idx = self._selected_task_index()
+            if idx is None:
+                messagebox.showwarning("Нет выбора", "Сначала выберите задачу в списке.")
+                return
+            if not messagebox.askyesno("Подтверждение", "Удалить выбранную задачу?"):
+                return
+
+            del self.tasks[idx]
+            self._refresh_tasks_list()
+            self._save_all()
+            self.clear_form()
+            self.status_var.set("Задача удалена и сохранена.")
+        except Exception as exc:
+            messagebox.showerror("Неожиданная ошибка", str(exc))
+
+    def clear_form(self) -> None:
+        self.time_entry.delete(0, tk.END)
+        self.title_entry.delete(0, tk.END)
+        self.description_text.delete("1.0", tk.END)
+        self.completed_var.set(False)
+        self.status_var.set("Форма очищена.")
+
+    def _parse_time_entry(self, time_str: str) -> dt.time:
+        raw = time_str.strip()
+        if not raw:
+            raise ValueError("Поле времени не может быть пустым.")
+        try:
+            return parse_task_time(raw)
+        except ValueError as exc:
+            raise ValueError("Неверный формат времени. Используйте ЧЧ:ММ (например 09:30).") from exc
+
+    def _validate_not_past(self, time_value: dt.time) -> None:
+        task_dt = dt.datetime.combine(self.today, time_value)
+        now = dt.datetime.now().replace(second=0, microsecond=0)
+        if task_dt < now:
+            raise ValueError("Нельзя поставить задачу на время в прошлом.")
+
+    def _refresh_tasks_list(self) -> None:
+        self.tasks_listbox.delete(0, tk.END)
+        for task in self.tasks:
+            self.tasks_listbox.insert(tk.END, task.format_for_list())
+
+    def _selected_task_index(self) -> Optional[int]:
+        sel = self.tasks_listbox.curselection()
+        if not sel:
+            return None
+        return int(sel[0])
