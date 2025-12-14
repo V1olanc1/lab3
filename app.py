@@ -257,3 +257,61 @@ class DayPlannerApp(tk.Tk):
 
         card.columnconfigure(1, weight=1)
         card.rowconfigure(3, weight=1)
+
+    def _create_trackers_panel(self, parent: ttk.Frame) -> None:
+        card = ttk.Frame(parent, style="Card.TFrame", padding=10)
+        card.grid(row=1, column=0, sticky="nsew", padx=(0, 5), pady=(5, 0))
+
+        ttk.Label(card, text="Трекеры", style="Header.TLabel").pack(anchor=tk.W)
+
+        notebook = ttk.Notebook(card)
+        notebook.pack(fill=tk.BOTH, expand=True, pady=(8, 0))
+
+        # вкладки в цикле по конфигам
+        for key, cfg in self.tracker_mgr.configs.items():
+            tab = ttk.Frame(notebook)
+            notebook.add(tab, text=cfg.title)
+            if cfg.is_sleep:
+                self._build_sleep_tab(tab, key)
+            else:
+                self._build_counter_tab(tab, key)
+
+    def _build_counter_tab(self, tab: ttk.Frame, key: str) -> None:
+        cfg = self.tracker_mgr.configs[key]
+
+        text_var = tk.StringVar(value="")
+        ttk.Label(tab, textvariable=text_var).pack(anchor=tk.W)
+
+        bar = ttk.Progressbar(tab, orient=tk.HORIZONTAL, mode="determinate")
+        bar.pack(fill=tk.X, pady=(6, 10))
+
+        row = ttk.Frame(tab)
+        row.pack(fill=tk.X)
+
+        ttk.Button(row, text=f"−{cfg.step}", command=lambda: self._tracker_delta(key, -cfg.step)).pack(
+            side=tk.LEFT
+        )
+        ttk.Button(row, text=f"+{cfg.step}", command=lambda: self._tracker_delta(key, cfg.step)).pack(
+            side=tk.LEFT, padx=(6, 12)
+        )
+
+        ttk.Label(row, text="Норма:").pack(side=tk.LEFT)
+
+        goal_var = tk.IntVar(value=self.tracker_mgr.state[key].goal)
+        spin_cls = getattr(ttk, "Spinbox", tk.Spinbox)
+        spin = spin_cls(
+            row,
+            from_=cfg.min_goal,
+            to=cfg.max_goal,
+            increment=max(1, cfg.step),
+            width=8,
+            textvariable=goal_var,
+            command=lambda: self._apply_goal_counter(key),
+        )
+        spin.pack(side=tk.LEFT, padx=6)
+        spin.bind("<Return>", lambda _e: self._apply_goal_counter(key))
+        spin.bind("<FocusOut>", lambda _e: self._apply_goal_counter(key))
+
+        ttk.Button(row, text="Сброс", command=lambda: self._reset_tracker(key)).pack(side=tk.RIGHT)
+
+        self.tracker_ui[key] = {"text": text_var, "bar": bar, "goal": goal_var}
