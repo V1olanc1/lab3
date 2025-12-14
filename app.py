@@ -7,6 +7,9 @@ from typing import Any, Dict, List
 
 
 import tkinter as tk
+from tkinter import ttk
+import tkinter.font as tkfont
+
 from trackers import TrackerManager
 
 PRIMARY_COLOR = "#3f51b5"
@@ -89,3 +92,31 @@ class DayPlannerApp(tk.Tk):
 
         self._refresh_tasks_list()
         self._refresh_all_trackers_ui()
+
+    def _init_style(self) -> None:
+        style = ttk.Style(self)
+        try:
+            style.theme_use("clam")
+        except tk.TclError:
+            pass
+
+        default_font = tkfont.nametofont("TkDefaultFont")
+        default_font.configure(size=10, family="Segoe UI")
+
+        style.configure("TFrame", background=BACKGROUND_COLOR)
+        style.configure("Card.TFrame", background=CARD_BACKGROUND)
+        style.configure("TLabel", background=BACKGROUND_COLOR, foreground="#222")
+        style.configure("Header.TLabel", font=("Segoe UI", 11, "bold"))
+        style.configure("TEntry", padding=4)
+        style.configure("TButton", padding=(8, 4))
+        style.configure(
+            "Accent.TButton",
+            padding=(10, 5),
+            foreground="#ffffff",
+            background=PRIMARY_COLOR,
+        )
+        style.map(
+            "Accent.TButton",
+            foreground=[("active", "#ffffff"), ("pressed", "#ffffff")],
+            background=[("!disabled", PRIMARY_COLOR), ("pressed", PRIMARY_DARK), ("active", PRIMARY_DARK)],
+        )
