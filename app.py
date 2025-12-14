@@ -1,16 +1,23 @@
-# This is a sample Python script.
+from __future__ import annotations
+import datetime as dt
+from pathlib import Path
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+PRIMARY_COLOR = "#3f51b5"
+PRIMARY_DARK = "#303f9f"
+BACKGROUND_COLOR = "#f5f5f7"
+CARD_BACKGROUND = "#ffffff"
+STATUS_BG = "#e0e0e0"
+
+DATA_FILE_NAME = "day_planner_data.json"
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+def get_storage_path() -> Path:
+    try:
+        base_dir = Path(__file__).resolve().parent
+    except NameError:
+        base_dir = Path.cwd()
+    return base_dir / DATA_FILE_NAME
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+def parse_task_time(time_str: str) -> dt.time:
+    return dt.datetime.strptime(time_str.strip(), "%H:%M").time()

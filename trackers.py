@@ -181,7 +181,7 @@ class TrackerManager:
             }
         return {"version": DATA_VERSION, "trackers": trackers}
 
-    def load_from_dict(self, data: Dict[str, Any]) -> None:
+    def load_from_dict(self, data: Any) -> None:
         """Загрузка трекеров из dict (с защитой от мусора)."""
         if not isinstance(data, dict):
             return
